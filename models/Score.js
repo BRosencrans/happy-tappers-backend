@@ -1,6 +1,15 @@
 const { Schema, Types, model } = require("mongoose");
 
-const scoreSchema = new Schema();
+const scoreSchema = new Schema({
+    user: {
+        type: String,
+        required: true,
+    },
+    score: {
+        type: Number,
+        required: true,
+    },
+});
 
 const Score = model("Score", scoreSchema);
 
