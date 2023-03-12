@@ -1,4 +1,6 @@
 const { User, Score } = require("../models");
+const bcrypt = require("mongoose-bcrypt");
+const jwt = require("jsonwebtoken");
 
 module.exports = {
     getUsers(req, res) {
@@ -7,16 +9,77 @@ module.exports = {
             .then((users) => res.json(users))
             .catch((err) => res.status(500).json(err));
     },
+    loginUser(req, res) {
+        User.findOne({
+            where: {
+                username: req.body.username,
+            },
+        })
+            .then((foundUser) => {
+                if (!foundUser) {
+                    return res.status(401).json({ msg: "User and/or password is incorrect." });
+                }
+                if (!bcrypt.compareSync(req.body.password, foundUser.password)) {
+                    return res.status(401).json({ msg: "User and/or password is incorrect." });
+                }
+                const token = jwt.sign({ username: foundUser.username, id: foundUser.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+                return res.json(foundUser);
+            })
+            .catch((err) => res.status(500).json(err));
+    },
+    signupUser(req, res) {
+        User.create(req.body)
+            .then((user) => {
+                const token = jwt.sign(
+                    {
+                        username: user.username,
+                        id: user.id,
+                    },
+                    process.env.JWT_SECRET,
+                    { expiresIn: "1h" }
+                );
+                return res.json(token, user);
+            })
+            .catch((err) => res.status(500).json(err));
+    },
+    createUser(req, res) {
+        User.create(req.body)
+            .then((user) => {
+                const token = jwt.sign(
+                    {
+                        username: user.username,
+                        id: user.id,
+                    },
+                    process.env.JWT_SECRET,
+                    { expiresIn: "1h" }
+                );
+                return res.json(token, user);
+            })
+            .catch((err) => res.status(500).json(err));
+    },
+    isValidToken(req, res) {
+        const token = req.headers?.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(403).json({ isValid: false, msg: "You are not logged in." });
+        }
+        try {
+            const tokenData = jwt.verify(token, process.env.JWT_SECRET);
+            res.json({
+                isValid: true,
+                user: tokenData,
+            });
+        } catch (err) {
+            res.status(403).json({
+                isValid: false,
+                msg: "invalid token",
+            });
+        }
+    },
     getSingleUser(req, res) {
         User.findOne({ _id: req.params.UserId })
             .select("-__v")
             .populate("scores")
             .then((user) => (!user ? res.status(404).json({ message: "No user found." }) : res.json(user)))
-            .catch((err) => res.status.json(err));
-    },
-    createUser(req, res) {
-        User.create(req.body)
-            .then((user) => res.json(user))
             .catch((err) => res.status(500).json(err));
     },
     updateUser(req, res) {
