@@ -43,9 +43,10 @@ module.exports = {
             .catch((err) => res.status(500).json(err));
     },
     createUser(req, res) {
+        const{ username , password }= req.body
         User.create(req.body)
             .then((user) => {
-                const token = jwt.sign(
+                const obj = jwt.sign(
                     {
                         username: user.username,
                         id: user.id,
@@ -53,7 +54,7 @@ module.exports = {
                     process.env.JWT_SECRET,
                     { expiresIn: "1h" }
                 );
-                return res.json(token, user);
+                return res.status(200).json(obj);
             })
             .catch((err) => res.status(500).json(err));
     },
