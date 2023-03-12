@@ -9,31 +9,32 @@ module.exports = {
             .then((users) => res.json(users))
             .catch((err) => res.status(500).json(err));
     },
-    loginUser(req, res) {
-        User.findOne({
-            where: {
-                username: req.body.username,
-            },
-        })
-            .then((foundUser) => {
-                if (!foundUser) {
-                    return res.status(401).json({ msg: "User and/or password is incorrect." });
-                }
-                if (!bcrypt.compareSync(req.body.password, foundUser.password)) {
-                    return res.status(401).json({ msg: "User and/or password is incorrect." });
-                }
-                const token = jwt.sign({ username: foundUser.username, id: foundUser.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-                return res.json(foundUser);
+    
+        loginUser(req, res) {
+            User.findOne({
+                where: {
+                    username: req.body.username,
+                },
             })
-            .catch((err) => res.status(500).json(err));
-    },
+                .then((foundUser) => {
+                    if (!foundUser) {
+                        return res.status(401).json({ msg: "User and/or password is incorrect." });
+                    }
+                    if (!bcrypt.compareSync(req.body.password, foundUser.password)) {
+                        return res.status(401).json({ msg: "User and/or password is incorrect." });
+                    }
+                    
+                    const token = jwt.sign({ username: foundUser.username  }, process.env.JWT_SECRET, { expiresIn: "1h" });
+                    return res.json(foundUser, token);
+                })
+                .catch((err) => res.status(500).json(err));
+        },
     signupUser(req, res) {
         User.create(req.body)
             .then((user) => {
                 const token = jwt.sign(
                     {
-                        username: user.username,
-                        id: user.id,
+    
                     },
                     process.env.JWT_SECRET,
                     { expiresIn: "1h" }
@@ -49,7 +50,7 @@ module.exports = {
                 const obj = jwt.sign(
                     {
                         username: user.username,
-                        id: user.id,
+                        
                     },
                     process.env.JWT_SECRET,
                     { expiresIn: "1h" }
