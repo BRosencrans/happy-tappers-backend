@@ -12,20 +12,22 @@ module.exports = {
     
         loginUser(req, res) {
             User.findOne({
-                where: {
-                    username: req.body.username,
-                },
+                username: req.body.username
+              
             })
                 .then((foundUser) => {
+                    
                     if (!foundUser) {
-                        return res.status(401).json({ msg: "User and/or password is incorrect." });
+                        return res.status(401).json({ msg: "User  is incorrect." });
                     }
-                    if (!bcrypt.compareSync(req.body.password, foundUser.password)) {
-                        return res.status(401).json({ msg: "User and/or password is incorrect." });
+                    if (!foundUser.verifyPasswordSync(req.body.password)) {
+                        return res.status(401).json({ msg: "password is incorrect." });
                     }
                     
                     const token = jwt.sign({ username: foundUser.username  }, process.env.JWT_SECRET, { expiresIn: "1h" });
-                    return res.json(foundUser, token);
+                    console.log(foundUser)
+                    return res.json({foundUser, token  });
+                    
                 })
                 .catch((err) => res.status(500).json(err));
         },
