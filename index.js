@@ -4,7 +4,7 @@ const routes = require("./routes");
 const cors = require("cors");
 
 let corsOptions = {
-    origin: "https://happytappers.netlify.app/",
+    origin: "https://main--happytappers.netlify.app",
 };
 
 const PORT =  process.env.PORT || 3001;
