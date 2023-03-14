@@ -4,7 +4,7 @@ const routes = require("./routes");
 const cors = require("cors");
 
 let corsOptions = {
-    origin: "https://happytappers.netlify.app/g",
+    origin: "https://happytappers.netlify.app",
     credentials: true,
 };
 
