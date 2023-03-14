@@ -4,7 +4,7 @@ const routes = require("./routes");
 const cors = require("cors");
 
 let corsOptions = {
-    origin: "https://happytappers.netlify.app/",
+    origin: "https://happytappers.netlify.app",
     credentials: true,
 };
 
@@ -14,7 +14,7 @@ const app = express();
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use('/api', routes);
+app.use('/', routes);
 
 db.once("open", () => {
     app.listen(PORT, () => {
