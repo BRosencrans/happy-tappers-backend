@@ -5,6 +5,7 @@ const cors = require("cors");
 
 let corsOptions = {
     origin: "https://main--happytappers.netlify.app",
+    credentials: true,
 };
 
 const PORT =  process.env.PORT || 3001;
