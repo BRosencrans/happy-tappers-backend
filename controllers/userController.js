@@ -9,7 +9,7 @@ module.exports = {
             .then((users) => res.json(users))
             .catch((err) => res.status(500).json(err));
     },
-    
+
     loginUser(req, res) {
         User.findOne({
             username: req.body.username,
@@ -22,7 +22,7 @@ module.exports = {
                     return res.status(401).json({ msg: "password is incorrect." });
                 }
 
-                const token = jwt.sign({ username: foundUser.username }, process.env.JWT_SECRET, { expiresIn: "1h" });
+                const token = jwt.sign({ username: foundUser.username, id: foundUser.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
                 console.log(foundUser);
                 return res.json({ user: foundUser, token });
             })
@@ -31,25 +31,19 @@ module.exports = {
     signupUser(req, res) {
         User.create(req.body)
             .then((user) => {
-                const token = jwt.sign(
-                    {
-    
-                    },
-                    process.env.JWT_SECRET,
-                    { expiresIn: "1h" }
-                );
+                const token = jwt.sign({ username: user.username, id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
                 return res.json(token, user);
             })
             .catch((err) => res.status(500).json(err));
     },
     createUser(req, res) {
-        const{ username , password }= req.body
+        const { username, password } = req.body;
         User.create(req.body)
             .then((user) => {
                 const obj = jwt.sign(
                     {
                         username: user.username,
-                        
+                        id: user.id,
                     },
                     process.env.JWT_SECRET,
                     { expiresIn: "1h" }
@@ -60,11 +54,13 @@ module.exports = {
     },
     isValidToken(req, res) {
         const token = req.headers?.authorization?.split(" ")[1];
+        console.log(token);
         if (!token) {
             return res.status(403).json({ isValid: false, msg: "You are not logged in." });
         }
         try {
             const tokenData = jwt.verify(token, process.env.JWT_SECRET);
+            console.log(tokenData);
             res.json({
                 isValid: true,
                 user: tokenData,
@@ -77,7 +73,7 @@ module.exports = {
         }
     },
     getSingleUser(req, res) {
-        User.findOne({ _id: req.params.UserId })
+        User.findOne({ _id: req.params.userId })
             .select("-__v")
             .populate("scores")
             .then((user) => (!user ? res.status(404).json({ message: "No user found." }) : res.json(user)))
